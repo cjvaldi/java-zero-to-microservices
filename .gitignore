@@ -1,0 +1,13 @@
+# IntelliJ IDEA
+.idea/
+*.iml
+out/
+
+# Maven / Gradle (Compilados)
+target/
+build/
+.gradle/
+
+# Archivos del sistema
+Thumbs.db
+.DS_Store
