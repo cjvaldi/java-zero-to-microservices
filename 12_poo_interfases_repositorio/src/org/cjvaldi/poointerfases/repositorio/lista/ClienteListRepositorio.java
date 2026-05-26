@@ -1,5 +1,6 @@
 package org.cjvaldi.poointerfases.repositorio.lista;
 
+import org.cjvaldi.poointerfases.excepciones.LecturaAccesoDatoException;
 import org.cjvaldi.poointerfases.modelo.Cliente;
 import org.cjvaldi.poointerfases.repositorio.AbstractaListRepositorio;
 import org.cjvaldi.poointerfases.repositorio.Direccion;
@@ -11,7 +12,7 @@ public class ClienteListRepositorio extends AbstractaListRepositorio<Cliente> { 
 //public class ClienteListRepositorio implements CrudRepositorio, OrdenableRepositorio, PaginableRepositorio {
 
     @Override
-    public void editar(Cliente cliente) {
+    public void editar(Cliente cliente) throws LecturaAccesoDatoException {
         Cliente c = this.porId(cliente.getId());
         c.setNombre(cliente.getNombre());
         c.setApellido(cliente.getApellido());

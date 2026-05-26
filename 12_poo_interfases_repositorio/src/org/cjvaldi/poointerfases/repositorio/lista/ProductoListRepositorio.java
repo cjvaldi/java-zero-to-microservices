@@ -1,5 +1,6 @@
 package org.cjvaldi.poointerfases.repositorio.lista;
 
+import org.cjvaldi.poointerfases.excepciones.LecturaAccesoDatoException;
 import org.cjvaldi.poointerfases.modelo.Cliente;
 import org.cjvaldi.poointerfases.modelo.Producto;
 import org.cjvaldi.poointerfases.repositorio.AbstractaListRepositorio;
@@ -11,7 +12,7 @@ import java.util.List;
 public class ProductoListRepositorio extends AbstractaListRepositorio<Producto> {
 
     @Override
-    public void editar(Producto producto) {
+    public void editar(Producto producto) throws LecturaAccesoDatoException {
         Producto p = porId(producto.getId());
         p.setDescripcion(producto.getDescripcion());
         p.setPrecio(producto.getPrecio());
