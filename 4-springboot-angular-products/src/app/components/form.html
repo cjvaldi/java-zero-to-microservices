@@ -1,0 +1,63 @@
+<h2>Formulario {{product.id >0 ? 'Update' : 'Create'}} Productos</h2>
+
+<form (ngSubmit)="onSubmit(productForm)" #productForm="ngForm">
+    <div class="mb-3">
+        <input class="form-control my-2" 
+        placeholder="Nombre" 
+        name="name" 
+        #name="ngModel"
+        required
+        minlength="4"
+        [(ngModel)]="product.name">
+        @if(name.invalid && (name.dirty || name.touched)){
+            <div class="text-danger" >
+                @if(name.errors!['required']){
+                    El nombre es requerido.
+                }
+                @if(name.errors!['minlength']){
+                    El nombre debe tener al menos 4 caracteres.
+                }
+            </div>
+        }
+    </div>
+    <div class="mb-3">
+        <input class="form-control my-2" 
+        placeholder="Descripción" 
+        name="description" 
+        #description="ngModel"
+        required
+        [(ngModel)]="product.description">
+        @if(description.invalid && (description.dirty || description.touched)){
+            <div class="text-danger" >
+                @if(description.errors!['required']){
+                    La descripción es requerida.
+                }
+            </div>
+        }
+    </div>
+    <div class="mb-3">
+        <input class="form-control my-2" 
+        type="number" 
+        placeholder="Precio" 
+        name="price" 
+        #price="ngModel"
+        required
+        required min="10"
+        [(ngModel)]="product.price">
+        @if(price.invalid && (price.dirty || price.touched)){
+            <div class="text-danger" >
+                @if(price.errors!['required']){
+                    El precio es requerido.
+                }
+                @if(price.errors!['min']){
+                    El precio debe ser mayor a 10.
+                }
+            </div>
+        }
+    </div>
+    <button type="submit" 
+        [disabled]="!productForm.form.valid"
+        class="btn btn-primary my-2">
+        {{product.id >0 ? 'Update' : 'Create'}}
+    </button>
+</form>
