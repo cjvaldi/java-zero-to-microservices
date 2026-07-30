@@ -2,7 +2,7 @@
     "configurations": [
         {
             "type": "java",
-            "name": "Spring Boot-MsvcProductsApplication<msvc-products>",
+            "name": "Spring Boot-MsvcProductsApplication<msvc-products> 8001",
             "request": "launch",
             "cwd": "${workspaceFolder}",
             "mainClass": "com.cjvaldi.springcloud.msvc.products.msvc_products.MsvcProductsApplication",
@@ -12,13 +12,14 @@
         },
         {
             "type": "java",
-            "name": "Spring Boot-MsvcProductsApplication<msvc-products>",
+            "name": "Spring Boot-MsvcProductsApplication<msvc-products> 9001",
             "request": "launch",
             "cwd": "${workspaceFolder}",
             "mainClass": "com.cjvaldi.springcloud.msvc.products.MsvcProductsApplication",
             "projectName": "msvc-products",
             "args": "",
-            "envFile": "${workspaceFolder}/.env"
+            "envFile": "${workspaceFolder}/.env",
+            "vmArgs": "-Dserver.port=9001"
         }
     ]
 }
