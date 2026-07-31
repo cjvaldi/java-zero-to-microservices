@@ -1,0 +1,34 @@
+spring:
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+          - id: msvc-products
+            uri: lb://msvc-products
+            predicates:
+            - Path=/api/products/**
+            # - Header=token, 12345 # se pueden agregar expresiones regulares
+            # - Method=GET, POST
+            # - Query=color, verde
+            # - Cookie=color, azul
+            # - Header=Content-Type, application/json
+            filters:
+            - StripPrefix=2
+            - name: SampleCookie
+              args:
+                message: Hola mi mensaje persolizado para productos!
+                name: user
+                value: Cristian
+            
+          - id: msvc-items
+            uri: lb://msvc-items
+            predicates:
+            - Path=/api/items/**
+            filters:
+            - StripPrefix=2
+            - SampleCookie=Hola mi mensaje personalizado en items, user, Items
+            - AddRequestHeader=token-request, aabbsjsjsjs
+            - AddResponseHeader=token-response, 12345678
+            - AddRequestParameter=name, Cristian
+            - SetResponseHeader=Content-Type, text/plain

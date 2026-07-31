@@ -5,7 +5,6 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.cjvaldi.springcloud.msvc.items.clients.ProductFeingClient;
@@ -17,8 +16,11 @@ import feign.FeignException;
 @Service
 public class ItemServiceFeing implements ItemService{
 
-    @Autowired
-    private ProductFeingClient client;
+    private final ProductFeingClient client;
+
+    ItemServiceFeing(ProductFeingClient client) {
+        this.client = client;
+    }
 
     @Override
     public List<Item> findAll() {

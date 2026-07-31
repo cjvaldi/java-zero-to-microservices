@@ -8,7 +8,13 @@
 		},
 		{
 			"path": "../../../../msvc-items"
+		},
+		{
+			"name": "msvc-gatawey-server",
+			"path": "../../../../msvc-gatewey-server"
 		}
 	],
-	"settings": {}
+	"settings": {
+		"java.configuration.updateBuildConfiguration": "interactive"
+	}
 }
