@@ -1,19 +1,22 @@
-package com.cjvaldi.springboot.datajpa.app.models.entities;
+package com.cjvaldi.springboot.datajpa.app.models.entity;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-//import jakarta.persistence.PrePersist;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
-//import jakarta.persistence.Temporal;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
@@ -39,10 +42,16 @@ public class Cliente implements Serializable {
 
 	@NotNull
 	@Column(name = "create_at")
-//	@Temporal(TemporalType.DATE)
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
-	private Date createAt;
+	private LocalDate createAt;
 	
+	@OneToMany(mappedBy = "cliente", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<Factura> facturas;
+		
+	public Cliente() {
+		facturas = new ArrayList<Factura>();
+	}
+
 	private String foto;
 
 	public Long getId() {
@@ -77,7 +86,7 @@ public class Cliente implements Serializable {
 		this.email = email;
 	}
 
-	public Date getCreateAt() {
+	public LocalDate getCreateAt() {
 		return createAt;
 	}
 
@@ -89,7 +98,7 @@ public class Cliente implements Serializable {
 		this.foto = foto;
 	}
 
-	public void setCreateAt(Date createAt) {
+	public void setCreateAt(LocalDate createAt) {
 		this.createAt = createAt;
 	}
 
@@ -97,4 +106,22 @@ public class Cliente implements Serializable {
 		return serialVersionUID;
 	}
 
+	public List<Factura> getFacturas() {
+		return facturas;
+	}
+
+	public void setFacturas(List<Factura> facturas) {
+		this.facturas = facturas;
+	}
+
+	public void addFactura(Factura factura) {
+		facturas.add(factura);
+	}
+
+	@Override
+	public String toString() {
+		return  nombre + " " + apellido;
+	}
+	
+	
 }

@@ -5,7 +5,9 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import com.cjvaldi.springboot.datajpa.app.models.entities.Cliente;
+import com.cjvaldi.springboot.datajpa.app.models.entity.Cliente;
+import com.cjvaldi.springboot.datajpa.app.models.entity.Factura;
+import com.cjvaldi.springboot.datajpa.app.models.entity.Producto;
 
 public interface IClienteService {
 	
@@ -17,6 +19,22 @@ public interface IClienteService {
 	
 	public Cliente findOne(Long id);
 	
+	public Cliente fetchByIdWithFacturas(Long id);
+	
 	public void delete(Long id);
+	
+	public List<Producto> finByNombre(String term);
+	
+	public void saveFactura(Factura factura);
+	
+	public Producto finProductoById(Long id);
+	
+	public Factura finFacturaById(Long id);
+	
+	public void deleteFactura(Long id);
+	
+	public Factura fetchFacturaByIdWithClienteWithItemFacturaWithProducto(Long id);
+	
+	
 
 }

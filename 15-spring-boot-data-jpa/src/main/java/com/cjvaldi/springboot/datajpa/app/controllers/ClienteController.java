@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -25,7 +24,7 @@ import org.springframework.web.bind.support.SessionStatus;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.cjvaldi.springboot.datajpa.app.models.entities.Cliente;
+import com.cjvaldi.springboot.datajpa.app.models.entity.Cliente;
 import com.cjvaldi.springboot.datajpa.app.models.service.IClienteService;
 import com.cjvaldi.springboot.datajpa.app.models.service.IUploadFileService;
 import com.cjvaldi.springboot.datajpa.app.util.paginator.PageRender;
@@ -37,11 +36,14 @@ import jakarta.validation.Valid;
 								// hiden
 public class ClienteController {
 
-	@Autowired
-	private IClienteService clienteService;
-	
-	@Autowired
-	private IUploadFileService uploadFileService;
+	private final IClienteService clienteService;
+	private final IUploadFileService uploadFileService;
+
+	public ClienteController(IClienteService clienteService, 
+			IUploadFileService uploadFileService) {
+	    this.clienteService = clienteService;
+	    this.uploadFileService = uploadFileService;
+	}
 	
 	@GetMapping(value="/uploads/{filename:.+}")
 	public ResponseEntity<Resource> verFoto(@PathVariable String filename){
@@ -61,7 +63,8 @@ public class ClienteController {
 	@GetMapping(value="/ver/{id}")
 	public String ver(@PathVariable(value="id") Long id, Map<String, Object> model, RedirectAttributes flash) {
 		
-		Cliente cliente = clienteService.findOne(id);
+//		Cliente cliente = clienteService.findOne(id);
+		Cliente cliente = clienteService.fetchByIdWithFacturas(id);
 		if(cliente == null) {
 			flash.addAttribute("error","El cliente no existe en la base de datos");
 			return "redirect:/listar";
@@ -73,7 +76,7 @@ public class ClienteController {
 		return "ver";
 	}
 
-	@RequestMapping(value = "/listar", method = RequestMethod.GET)
+	@GetMapping("/listar")
 	public String listar(@RequestParam(name="page", defaultValue = "0") int page, Model model) {
 		
 		Pageable pageRequest = PageRequest.of(page, 5);
