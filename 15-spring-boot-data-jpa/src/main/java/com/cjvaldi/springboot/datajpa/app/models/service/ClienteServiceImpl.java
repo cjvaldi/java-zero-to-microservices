@@ -2,7 +2,6 @@ package com.cjvaldi.springboot.datajpa.app.models.service;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -18,14 +17,18 @@ import com.cjvaldi.springboot.datajpa.app.models.entity.Producto;
 @Service
 public class ClienteServiceImpl implements IClienteService {
 
-	@Autowired
-	private IClienteDao clienteDao;
-	
-	@Autowired
-	private IProductoDao productoDao;
-	
-	@Autowired
-	private IFacturaDao facturaDao;
+	private final IClienteDao clienteDao;
+	private final IProductoDao productoDao;
+	private final IFacturaDao facturaDao;
+
+	public ClienteServiceImpl(IClienteDao clienteDao, 
+			IProductoDao productoDao, 
+			IFacturaDao facturaDao) {
+		
+		this.clienteDao = clienteDao;
+		this.productoDao = productoDao;
+		this.facturaDao = facturaDao;
+	}
 	
 	@Override
 	@Transactional(readOnly = true)

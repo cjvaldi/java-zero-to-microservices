@@ -2,14 +2,25 @@ package com.cjvaldi.springboot.datajpa.app.controllers;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.Collection;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestWrapper;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -17,7 +28,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.SessionStatus;
@@ -29,6 +39,7 @@ import com.cjvaldi.springboot.datajpa.app.models.service.IClienteService;
 import com.cjvaldi.springboot.datajpa.app.models.service.IUploadFileService;
 import com.cjvaldi.springboot.datajpa.app.util.paginator.PageRender;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 @Controller
@@ -38,6 +49,8 @@ public class ClienteController {
 
 	private final IClienteService clienteService;
 	private final IUploadFileService uploadFileService;
+	
+	protected final Log logger = LogFactory.getLog(this.getClass());
 
 	public ClienteController(IClienteService clienteService, 
 			IUploadFileService uploadFileService) {
@@ -45,6 +58,7 @@ public class ClienteController {
 	    this.uploadFileService = uploadFileService;
 	}
 	
+	@Secured("ROLE_USER")
 	@GetMapping(value="/uploads/{filename:.+}")
 	public ResponseEntity<Resource> verFoto(@PathVariable String filename){
 		
@@ -52,7 +66,6 @@ public class ClienteController {
 		try {
 			recurso = uploadFileService.load(filename);
 		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return ResponseEntity.ok()
@@ -60,6 +73,8 @@ public class ClienteController {
 				.body(recurso);
 	}
 	
+//	@Secured("ROLE_USER")
+	@PreAuthorize("hasRole('ROLE_USER')")  //prePostEnabled = true ->SprintSecurityConfig
 	@GetMapping(value="/ver/{id}")
 	public String ver(@PathVariable(value="id") Long id, Map<String, Object> model, RedirectAttributes flash) {
 		
@@ -76,20 +91,58 @@ public class ClienteController {
 		return "ver";
 	}
 
-	@GetMapping("/listar")
-	public String listar(@RequestParam(name="page", defaultValue = "0") int page, Model model) {
-		
-		Pageable pageRequest = PageRequest.of(page, 5);
-		
-		Page<Cliente> clientes = clienteService.findAll(pageRequest);
-		
-		PageRender<Cliente> pageRender =  new PageRender<>("/listar", clientes);
-		model.addAttribute("titulo", "Listado de clientes");
-		model.addAttribute("clientes", clientes);
-		model.addAttribute("page",pageRender);
-		return "listar";
+	@GetMapping(value = {"/listar", "/"})
+	public String listar(@RequestParam(name = "page", defaultValue = "0") int page, 
+	                     Model model, 
+	                     Authentication authentication,
+	                     HttpServletRequest request) {
+
+	    // 1. Inyección directa en el método del controlador
+	    if (authentication != null) {
+	        logger.info("Inyección directa -> Hola usuario: " + authentication.getName());
+	    }
+
+	    // 2. Forma estática mediante SecurityContextHolder
+	    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+	    if (auth != null && auth.isAuthenticated() && !auth.getName().equals("anonymousUser")) {
+	        logger.info("Forma estática SecurityContextHolder -> Hola usuario: " + auth.getName());
+
+	        // Comprobación con método propio hasRole
+	        if (hasRole("ROLE_ADMIN")) {
+	            logger.info("Método hasRole() -> Hola " + auth.getName() + ", tienes acceso.");
+	        } else {
+	            logger.info("Método hasRole() -> Hola " + auth.getName() + ", NO tienes acceso.");
+	        }
+
+	        // Forma usando SecurityContextHolderAwareRequestWrapper
+	        SecurityContextHolderAwareRequestWrapper securityContext = 
+	                new SecurityContextHolderAwareRequestWrapper(request, "");
+	        if (securityContext.isUserInRole("ROLE_ADMIN")) {
+	            logger.info("SecurityContextHolderAwareRequestWrapper -> Tienes acceso como ROLE_ADMIN");
+	        }
+
+	        // Forma nativa usando HttpServletRequest
+	        if (request.isUserInRole("ADMIN")) {
+	            logger.info("HttpServletRequest -> Tienes acceso como ADMIN");
+	        }
+	    } else {
+	        logger.info("Petición pública -> Usuario anónimo accediendo al listado.");
+	    }
+
+	    // Paginación y modelo
+	    Pageable pageRequest = PageRequest.of(page, 5);
+	    Page<Cliente> clientes = clienteService.findAll(pageRequest);
+
+	    PageRender<Cliente> pageRender = new PageRender<>("/listar", clientes);
+	    model.addAttribute("titulo", "Listado de clientes");
+	    model.addAttribute("clientes", clientes);
+	    model.addAttribute("page", pageRender);
+
+	    return "listar";
 	}
 
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = "/form")
 	public String crear(Map<String, Object> model) {
 		Cliente cliente = new Cliente();
@@ -98,6 +151,8 @@ public class ClienteController {
 		return "form";
 	}
 
+//	@Secured("ROLE_ADMIN")
+	@PreAuthorize("hasRole('ROLE_USER')")
 	@RequestMapping(value = "/form/{id}")
 	public String editar(@PathVariable(value = "id") Long id, Map<String, Object> model, RedirectAttributes flash) {
 		Cliente cliente = null;
@@ -117,6 +172,7 @@ public class ClienteController {
 		return "form";
 	}
 
+	@Secured("ROLE_ADMIN")
 	@PostMapping("/form")
 	public String guardar(@Valid Cliente cliente, BindingResult result, Model model, @RequestParam("file") MultipartFile foto, RedirectAttributes flash, SessionStatus status) {
 		if (result.hasErrors()) {
@@ -134,7 +190,6 @@ public class ClienteController {
 			try {
 				uniqueFilename = uploadFileService.copy(foto);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			flash.addFlashAttribute("info","Has subido correctamentes '"+uniqueFilename+"'");
@@ -150,6 +205,7 @@ public class ClienteController {
 		return "redirect:listar";
 	}
 
+	@Secured("ROLE_ADMIN")
 	@RequestMapping(value = "/eliminar/{id}")
 	public String eliminar(@PathVariable(value = "id") Long id, RedirectAttributes flash) {
 		if (id > 0) {
@@ -163,6 +219,31 @@ public class ClienteController {
 			}
 		}
 		return "redirect:/listar";
+	}
+	
+	private boolean hasRole(String role) {
+	    SecurityContext context = SecurityContextHolder.getContext();
+	    if (context == null || context.getAuthentication() == null) {
+	        return false;
+	    }
+
+	    Authentication auth = context.getAuthentication();
+	    Collection<? extends GrantedAuthority> authorities = auth.getAuthorities();
+
+	    if (authorities == null) {
+	        return false;
+	    }
+
+	    return authorities.stream()
+	            .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals(role));
+		
+//		for(GrantedAuthority authority: authorities) {
+//			if(role.equals(authority.getAuthority())){
+//				logger.info("Hola usuario ".concat(auth.getName()).concat(" tu role es ".concat(authority.getAuthority())));
+//				return true;
+//			}
+//		}
+//		return false;
 	}
 
 }
