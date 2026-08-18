@@ -21,10 +21,10 @@
 						<tr>
 						<!-- Columna Ver Detalle: visible solo para USER o ADMIN -->
 							<th sec:authorize="hasRole('ROLE_USER')">ID</th>
-							<th>Nombre</th>
-							<th>Apellido</th>
-							<th>Email</th>
-							<th>Fecha</th>
+							<th th:text="#{text.cliente.nombre}">Nombre</th>
+							<th th:text="#{text.cliente.apellido}">Apellido</th>
+							<th th:text="#{text.cliente.email}">Email</th>
+							<th th:text="#{text.cliente.createAt}">Fecha</th>
 							<!-- Columnas de gestión: visibles solo para ADMIN -->
 							<th sec:authorize="hasRole('ROLE_ADMIN')">crear factura</th>
 							<th sec:authorize="hasRole('ROLE_ADMIN')">Editar</th>

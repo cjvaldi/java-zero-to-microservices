@@ -3,10 +3,12 @@ package com.cjvaldi.springboot.datajpa.app.controllers;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Collection;
+import java.util.Locale;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.context.MessageSource;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -49,13 +51,16 @@ public class ClienteController {
 
 	private final IClienteService clienteService;
 	private final IUploadFileService uploadFileService;
+	private final MessageSource messageSource;
 	
 	protected final Log logger = LogFactory.getLog(this.getClass());
 
 	public ClienteController(IClienteService clienteService, 
-			IUploadFileService uploadFileService) {
+			IUploadFileService uploadFileService,
+			MessageSource messageSource) {
 	    this.clienteService = clienteService;
 	    this.uploadFileService = uploadFileService;
+	    this.messageSource = messageSource;
 	}
 	
 	@Secured("ROLE_USER")
@@ -95,7 +100,8 @@ public class ClienteController {
 	public String listar(@RequestParam(name = "page", defaultValue = "0") int page, 
 	                     Model model, 
 	                     Authentication authentication,
-	                     HttpServletRequest request) {
+	                     HttpServletRequest request,
+	                     Locale locale) {
 
 	    // 1. Inyección directa en el método del controlador
 	    if (authentication != null) {
@@ -135,7 +141,7 @@ public class ClienteController {
 	    Page<Cliente> clientes = clienteService.findAll(pageRequest);
 
 	    PageRender<Cliente> pageRender = new PageRender<>("/listar", clientes);
-	    model.addAttribute("titulo", "Listado de clientes");
+	    model.addAttribute("titulo", messageSource.getMessage("text.cliente.listar.titulo",null,locale));
 	    model.addAttribute("clientes", clientes);
 	    model.addAttribute("page", pageRender);
 

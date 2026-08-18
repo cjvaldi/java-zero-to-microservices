@@ -71,7 +71,7 @@ public class SpringSecurityConfig {
         http
             .authorizeHttpRequests(auth -> auth
                 // 1. Recursos estáticos y rutas de acceso libre sin autenticación
-                .requestMatchers("/", "/css/**", "/js/**", "/images/**", "/listar", "/login").permitAll()
+                .requestMatchers("/", "/css/**", "/js/**", "/images/**", "/listar", "/login","/locale").permitAll()
 
                 /*
                  * 2. Autorización por URL (Descomentar si no se usan anotaciones en los Controllers):
